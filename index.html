@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embryology Quiz - Immediate Feedback</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f4f4f9; 
+            color: #333; 
+            padding: 20px; 
+            line-height: 1.6;
+        }
+        .quiz-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: #fff; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+        }
+        h1 { 
+            color: #007bff; 
+            text-align: center; 
+            border-bottom: 2px solid #007bff; 
+            padding-bottom: 10px; 
+            margin-bottom: 30px; 
+        }
+        .question-block { 
+            margin-bottom: 25px; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            background-color: #f9f9f9; 
+        }
+        .question-text { 
+            font-weight: bold; 
+            font-size: 1.1em; 
+            color: #555; 
+            margin-bottom: 15px; 
+        }
+        .option-label { 
+            display: block; 
+            margin: 8px 0; 
+            cursor: pointer; 
+            padding: 8px 10px; 
+            transition: background-color 0.2s; 
+            border-radius: 4px;
+        }
+        .option-label:hover { 
+            background-color: #e9ecef; 
+        }
+        input[type="radio"] { 
+            margin-right: 10px; 
+        }
+        .question-submit { 
+            padding: 10px 20px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-top: 10px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .question-submit:hover { 
+            background-color: #0056b3; 
+        }
+        .question-submit:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .feedback { 
+            margin-top: 15px; 
+            padding: 12px; 
+            border-radius: 5px; 
+            font-weight: bold; 
+            display: none; 
+        }
+        .correct { 
+            background-color: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .incorrect { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }
+        .explanation { 
+            font-weight: normal; 
+            margin-top: 10px; 
+            font-size: 0.9em; 
+            color: #495057; 
+            display: none; 
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .progress-container {
+            margin-bottom: 20px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #28a745;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        .score-display {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .summary {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            display: none;
+        }
+        .restart-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        .restart-btn:hover {
+            background-color: #218838;
+        }
+        .correct-answer {
+            font-weight: bold;
+            color: #155724;
+        }
+    </style>
+
+<!-- ISU header/footer style injection -->
+<style>
+  :root{
+    --navy:#1e3a8a;
+    --muted:#6b7280;
+    --accent:#2563eb;
+  }
+  header.isu-header{ padding:16px 12px 6px; text-align:center; }
+  .isu-logo-wrap{ display:flex; justify-content:center; }
+  .isu-logo-wrap img{ height:72px; width:auto; object-fit:contain; }
+  .isu-uni, .isu-fac, .isu-title{
+    margin:6px 0 0; color:var(--navy); font-weight:800; line-height:1.2;
+  }
+  .isu-uni{ font-size:clamp(1.1rem, 2.2vw, 1.5rem); }
+  .isu-fac{ font-size:clamp(1.05rem, 2vw, 1.3rem); }
+  .isu-title{ font-size:clamp(1.15rem, 2.6vw, 1.6rem); }
+  .isu-subtitle{ margin:4px 0 0; color:var(--muted); font-size:.95rem; }
+  footer.isu-footer{ max-width:900px; margin:16px auto 24px; padding:0 12px; color:var(--muted); font-size:.9rem; text-align:center; }
+  .mini{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:.8rem; margin-left:6px; border:1px solid #e5e7eb; background:#fff; color:#111827; }
+</style>
+
+</head>
+\1
+
+<header class="isu-header">
+  <div class="isu-logo-wrap">
+    <img src="/mnt/data/logo-ISU.jpg" alt="ISU Logo" />
+  </div>
+  <div class="isu-uni"> Ibn Sinna University</div>
+  <div class="isu-fac">Faculty of Medicine</div>
+  <div class="isu-title">Embryology — Frist lectuer Interactive Quiz</div>
+  <div class="isu-subtitle">Introduction to Embryology & Molecular Regulation Quiz</div>
+</header>
+
+
+<div class="quiz-container">
+    <h1>Introduction to Embryology & Molecular Regulation Quiz</h1>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    
+    <div class="score-display" id="score-display">Score: 0/15 (0%)</div>
+    
+    <form id="embryology-quiz">
+        <!-- Question 1 -->
+        <div class="question-block" id="question1-block">
+            <div class="question-text">Q1. What is the definition of Embryology, according to the presentation?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question1" value="The study of postnatal development and aging.">
+                    The study of postnatal development and aging.
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question1" value="The microscopic study of tissues and organs.">
+                    The microscopic study of tissues and organs.
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question1" value="The study of prenatal development from fertilization to the fetal stage and birth.">
+                    The study of prenatal development from fertilization to the fetal stage and birth.
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question1" value="The study of hereditary mechanisms only.">
+                    The study of hereditary mechanisms only.
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(1)">Submit Answer</button>
+            <div id="feedback1" class="feedback"></div>
+            <div id="explanation1" class="explanation">
+                <span class="correct-answer">Explanation:</span> Embryology is defined as the study of prenatal development from fertilization to the fetal stage and birth.
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-block" id="question2-block">
+            <div class="question-text">Q2. The embryonic period, the most sensitive time for major congenital anomalies, covers which time frame?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question2" value="Weeks 1–2">
+                    Weeks 1–2
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question2" value="Weeks 3–8">
+                    Weeks 3–8
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question2" value="Weeks 9–Birth">
+                    Weeks 9–Birth
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question2" value="From birth throughout life">
+                    From birth throughout life
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(2)">Submit Answer</button>
+            <div id="feedback2" class="feedback"></div>
+            <div id="explanation2" class="explanation">
+                <span class="correct-answer">Explanation:</span> The <strong>embryonic period</strong> is designated as <strong>Weeks 3–8</strong>, which is the critical period for major congenital anomalies because organogenesis occurs during this time.
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-block" id="question3-block">
+            <div class="question-text">Q3. What is the key event that occurs during the Pre-Embryonic phase (Weeks 1-2)?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question3" value="Gastrulation and Neurulation">
+                    Gastrulation and Neurulation
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question3" value="Growth and functional maturation">
+                    Growth and functional maturation
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question3" value="Fertilization, cleavage, and implantation">
+                    Fertilization, cleavage, and implantation
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question3" value="Organogenesis">
+                    Organogenesis
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(3)">Submit Answer</button>
+            <div id="feedback3" class="feedback"></div>
+            <div id="explanation3" class="explanation">
+                <span class="correct-answer">Explanation:</span> The <strong>Pre-Embryonic phase (Weeks 1–2)</strong> includes fertilization, cleavage, and implantation.
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-block" id="question4-block">
+            <div class="question-text">Q4. Which developmental process establishes the three primary germ layers (Ectoderm, Mesoderm, Endoderm)?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question4" value="Cleavage">
+                    Cleavage
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question4" value="Gametogenesis">
+                    Gametogenesis
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question4" value="Gastrulation">
+                    Gastrulation
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question4" value="Implantation">
+                    Implantation
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(4)">Submit Answer</button>
+            <div id="feedback4" class="feedback"></div>
+            <div id="explanation4" class="explanation">
+                <span class="correct-answer">Explanation:</span> <strong>Gastrulation</strong> is the process that establishes the three primary germ layers (Ectoderm, Mesoderm, and Endoderm), which will give rise to all tissues and organs in the body.
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-block" id="question5-block">
+            <div class="question-text">Q5. Which of the following is NOT a major developmental signaling pathway mentioned in the presentation?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question5" value="HOX">
+                    HOX
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question5" value="BMP">
+                    BMP
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question5" value="SHH">
+                    SHH
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question5" value="cAMP">
+                    cAMP
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(5)">Submit Answer</button>
+            <div id="feedback5" class="feedback"></div>
+            <div id="explanation5" class="explanation">
+                <span class="correct-answer">Explanation:</span> The four critical developmental signaling pathways mentioned are <strong>HOX, SHH, WNT, and BMP</strong>.
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-block" id="question6-block">
+            <div class="question-text">Q6. The single cell formed by the union of a sperm and an oocyte during fertilization is called a/an:</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question6" value="Morula">
+                    Morula
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question6" value="Blastocyst">
+                    Blastocyst
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question6" value="Fetus">
+                    Fetus
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question6" value="Zygote">
+                    Zygote
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(6)">Submit Answer</button>
+            <div id="feedback6" class="feedback"></div>
+            <div id="explanation6" class="explanation">
+                <span class="correct-answer">Explanation:</span> The <strong>Zygote</strong> is defined as the single cell formed by the union of a sperm and an oocyte during fertilization, occurring on Day 0–1.
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-block" id="question7-block">
+            <div class="question-text">Q7. Which layer of the trophoblast is the outer multinucleated layer that invades the uterine endometrium during implantation?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question7" value="Hypoblast">
+                    Hypoblast
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question7" value="Syncytiotrophoblast">
+                    Syncytiotrophoblast
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question7" value="Cytotrophoblast">
+                    Cytotrophoblast
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question7" value="Epiblast">
+                    Epiblast
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(7)">Submit Answer</button>
+            <div id="feedback7" class="feedback"></div>
+            <div id="explanation7" class="explanation">
+                <span class="correct-answer">Explanation:</span> During implantation (Week 2), the trophoblast differentiates into the inner Cytotrophoblast and the outer multinucleated <strong>Syncytiotrophoblast</strong>, which invades the endometrium.
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-block" id="question8-block">
+            <div class="question-text">Q8. Which key term describes the developing human organism during the period of major organogenesis (Week 3–8)?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question8" value="Zygote">
+                    Zygote
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question8" value="Embryo">
+                    Embryo
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question8" value="Fetus">
+                    Fetus
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question8" value="Morula">
+                    Morula
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(8)">Submit Answer</button>
+            <div id="feedback8" class="feedback"></div>
+            <div id="explanation8" class="explanation">
+                <span class="correct-answer">Explanation:</span> The <strong>Embryo</strong> is the developing human organism during the period of major organogenesis, spanning Week 3–8.
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-block" id="question9-block">
+            <div class="question-text">Q9. Neural Tube Defects (like spina bifida and anencephaly) result from a failure of neural tube closure during which weeks?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question9" value="Weeks 1–2">
+                    Weeks 1–2
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question9" value="Weeks 3–4">
+                    Weeks 3–4
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question9" value="Weeks 9–12">
+                    Weeks 9–12
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question9" value="Weeks 13–16">
+                    Weeks 13–16
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(9)">Submit Answer</button>
+            <div id="feedback9" class="feedback"></div>
+            <div id="explanation9" class="explanation">
+                <span class="correct-answer">Explanation:</span> <strong>Neural Tube Defects</strong> result from the failure of neural tube closure during <strong>Weeks 3–4</strong>.
+            </div>
+        </div>
+
+        <!-- Question 10 -->
+        <div class="question-block" id="question10-block">
+            <div class="question-text">Q10. From which primary germ layer does the epithelial lining of the digestive system and the parenchyma of the liver and pancreas primarily develop?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question10" value="Ectoderm">
+                    Ectoderm
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question10" value="Mesoderm">
+                    Mesoderm
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question10" value="Endoderm">
+                    Endoderm
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question10" value="Neural Crest">
+                    Neural Crest
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(10)">Submit Answer</button>
+            <div id="feedback10" class="feedback"></div>
+            <div id="explanation10" class="explanation">
+                <span class="correct-answer">Explanation:</span> The <strong>Endoderm</strong> is the inner layer that gives rise to the epithelial lining of the gastrointestinal tract and glandular organs like the liver and pancreas parenchyma.
+            </div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="question-block" id="question11-block">
+            <div class="question-text">Q11. What is the term for any agent or factor that can cause a birth defect or congenital anomaly during development?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question11" value="Morphogen">
+                    Morphogen
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question11" value="Teratogen">
+                    Teratogen
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question11" value="Fibroblast">
+                    Fibroblast
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question11" value="Epigenome">
+                    Epigenome
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(11)">Submit Answer</button>
+            <div id="feedback11" class="feedback"></div>
+            <div id="explanation11" class="explanation">
+                <span class="correct-answer">Explanation:</span> A <strong>Teratogen</strong> is defined as any agent or factor (drugs, alcohol, infections, radiation, etc.) that can cause a birth defect or congenital anomaly.
+            </div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="question-block" id="question12-block">
+            <div class="question-text">Q12. Which structure gives rise to the Central Nervous System (Brain and Spinal Cord) and the Retina?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question12" value="Surface Ectoderm">
+                    Surface Ectoderm
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question12" value="Lateral Plate Mesoderm">
+                    Lateral Plate Mesoderm
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question12" value="Neuroectoderm (Neural Tube)">
+                    Neuroectoderm (Neural Tube)
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question12" value="Intermediate Mesoderm">
+                    Intermediate Mesoderm
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(12)">Submit Answer</button>
+            <div id="feedback12" class="feedback"></div>
+            <div id="explanation12" class="explanation">
+                <span class="correct-answer">Explanation:</span> The <strong>Neuroectoderm (Neural Tube)</strong> gives rise to the CNS and Retina. The Peripheral Nervous System is mainly derived from Neural Crest.
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="question-block" id="question13-block">
+            <div class="question-text">Q13. Which tissue/organ is derived from the <strong>Lateral Plate Mesoderm</strong>?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question13" value="Axial skeleton and skeletal muscle of the trunk">
+                    Axial skeleton and skeletal muscle of the trunk
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question13" value="Kidneys and ureters">
+                    Kidneys and ureters
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question13" value="Cardiovascular system (heart, blood vessels, blood cells)">
+                    Cardiovascular system (heart, blood vessels, blood cells)
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question13" value="Epidermis of the skin">
+                    Epidermis of the skin
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(13)">Submit Answer</button>
+            <div id="feedback13" class="feedback"></div>
+            <div id="explanation13" class="explanation">
+                <span class="correct-answer">Explanation:</span> The <strong>Lateral Plate Mesoderm</strong> gives rise to the <strong>cardiovascular system</strong>, smooth muscle, and connective tissue of the limbs.
+            </div>
+        </div>
+
+        <!-- Question 14 -->
+        <div class="question-block" id="question14-block">
+            <div class="question-text">Q14. The process of rapid mitotic cell divisions of the zygote without growth, producing smaller cells called blastomeres, is known as:</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question14" value="Gastrulation">
+                    Gastrulation
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question14" value="Organogenesis">
+                    Organogenesis
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question14" value="Cleavage">
+                    Cleavage
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question14" value="Gametogenesis">
+                    Gametogenesis
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(14)">Submit Answer</button>
+            <div id="feedback14" class="feedback"></div>
+            <div id="explanation14" class="explanation">
+                <span class="correct-answer">Explanation:</span> <strong>Cleavage</strong> is the rapid series of mitotic cell divisions of the zygote without growth, which produces smaller cells called blastomeres, occurring around Day 1–4.
+            </div>
+        </div>
+
+        <!-- Question 15 -->
+        <div class="question-block" id="question15-block">
+            <div class="question-text">Q15. What is the main clinical relevance of Embryology, according to the presentation?</div>
+            <div class="options">
+                <label class="option-label">
+                    <input type="radio" name="question15" value="It explains the causes of birth defects and supports reproductive medicine (IVF, genetic counseling).">
+                    It explains the causes of birth defects and supports reproductive medicine (IVF, genetic counseling).
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question15" value="It is solely used to interpret microscopic histology slides.">
+                    It is solely used to interpret microscopic histology slides.
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question15" value="It exclusively studies post-natal growth patterns.">
+                    It exclusively studies post-natal growth patterns.
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="question15" value="It is a field unrelated to human anatomy.">
+                    It is a field unrelated to human anatomy.
+                </label>
+            </div>
+            <button type="button" class="question-submit" onclick="checkQuestion(15)">Submit Answer</button>
+            <div id="feedback15" class="feedback"></div>
+            <div id="explanation15" class="explanation">
+                <span class="correct-answer">Explanation:</span> Embryology's clinical relevance includes explaining congenital malformations (birth defects), supporting imaging interpretation, and guiding reproductive medicine like IVF and genetic counseling.
+            </div>
+        </div>
+    </form>
+
+    <div class="summary" id="summary">
+        <h2>Quiz Complete!</h2>
+        <p id="final-score"></p>
+        <p>Thank you for completing the Embryology Quiz!</p>
+    </div>
+
+    <button type="button" class="restart-btn" onclick="restartQuiz()" style="display: none;">Restart Quiz</button>
+</div>
+
+<script>
+    // Define correct answers
+    const correctAnswers = {
+        1: "The study of prenatal development from fertilization to the fetal stage and birth.",
+        2: "Weeks 3–8",
+        3: "Fertilization, cleavage, and implantation",
+        4: "Gastrulation",
+        5: "cAMP",
+        6: "Zygote",
+        7: "Syncytiotrophoblast",
+        8: "Embryo",
+        9: "Weeks 3–4",
+        10: "Endoderm",
+        11: "Teratogen",
+        12: "Neuroectoderm (Neural Tube)",
+        13: "Cardiovascular system (heart, blood vessels, blood cells)",
+        14: "Cleavage",
+        15: "It explains the causes of birth defects and supports reproductive medicine (IVF, genetic counseling)."
+    };
+
+    let score = 0;
+    let answeredQuestions = 0;
+    const totalQuestions = 15;
+
+    function checkQuestion(questionNumber) {
+        const selectedOption = document.querySelector(`input[name="question${questionNumber}"]:checked`);
+        const feedbackDiv = document.getElementById(`feedback${questionNumber}`);
+        const explanationDiv = document.getElementById(`explanation${questionNumber}`);
+        const submitButton = document.querySelector(`#question${questionNumber}-block .question-submit`);
+        
+        if (!selectedOption) {
+            alert("Please select an answer before submitting.");
+            return;
+        }
+        
+        // Disable the submit button and all options for this question
+        submitButton.disabled = true;
+        const options = document.querySelectorAll(`#question${questionNumber}-block input[type="radio"]`);
+        options.forEach(option => {
+            option.disabled = true;
+        });
+        
+        // Check if the answer is correct
+        if (selectedOption.value === correctAnswers[questionNumber]) {
+            score++;
+            feedbackDiv.innerHTML = "✅ <strong>Correct!</strong>";
+            feedbackDiv.className = "feedback correct";
+        } else {
+            feedbackDiv.innerHTML = "❌ <strong>Incorrect.</strong>";
+            feedbackDiv.className = "feedback incorrect";
+        }
+        
+        // Show feedback and explanation
+        feedbackDiv.style.display = 'block';
+        explanationDiv.style.display = 'block';
+        
+        // Update progress
+        answeredQuestions++;
+        updateProgress();
+        
+        // Check if all questions are answered
+        if (answeredQuestions === totalQuestions) {
+            showSummary();
+        }
+    }
+
+    function updateProgress() {
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercentage = (answeredQuestions / totalQuestions) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+        
+        const scoreDisplay = document.getElementById('score-display');
+        const scorePercentage = ((score / totalQuestions) * 100).toFixed(1);
+        scoreDisplay.textContent = `Score: ${score}/${totalQuestions} (${scorePercentage}%)`;
+    }
+
+    function showSummary() {
+        const summaryDiv = document.getElementById('summary');
+        const finalScore = document.getElementById('final-score');
+        const scorePercentage = ((score / totalQuestions) * 100).toFixed(1);
+        
+        finalScore.innerHTML = `Your final score: <strong>${score}/${totalQuestions} (${scorePercentage}%)</strong>`;
+        summaryDiv.style.display = 'block';
+        document.querySelector('.restart-btn').style.display = 'block';
+    }
+
+    function restartQuiz() {
+        // Reset all questions
+        for (let i = 1; i <= totalQuestions; i++) {
+            const feedbackDiv = document.getElementById(`feedback${i}`);
+            const explanationDiv = document.getElementById(`explanation${i}`);
+            const submitButton = document.querySelector(`#question${i}-block .question-submit`);
+            const options = document.querySelectorAll(`#question${i}-block input[type="radio"]`);
+            
+            // Reset radio buttons
+            options.forEach(option => {
+                option.checked = false;
+                option.disabled = false;
+            });
+            
+            // Reset feedback and explanation
+            feedbackDiv.style.display = 'none';
+            explanationDiv.style.display = 'none';
+            
+            // Enable submit button
+            submitButton.disabled = false;
+        }
+        
+        // Reset score and progress
+        score = 0;
+        answeredQuestions = 0;
+        updateProgress();
+        
+        // Hide summary and restart button
+        document.getElementById('summary').style.display = 'none';
+        document.querySelector('.restart-btn').style.display = 'none';
+    }
+</script>
+
+
+<footer class="isu-footer">
+  <p> Quiz Programming &amp; Interactive Design: <strong>Dr. Salaheldin Terair</strong> <span class="mini">Developer</span></p>
+    <p>&copy; 2025 Ibn Sina University. All rights reserved.</p>
+
+</body>
+</html>
